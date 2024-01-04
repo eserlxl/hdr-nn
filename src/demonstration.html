@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Handwritten Digit Recognition</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css" rel="stylesheet">
+    <style type="text/css">
+        #Scaled {
+            display: none;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+        table {
+            margin: 0 auto;
+        }
+
+        body {
+            color: #59f4d5;
+            background-color: black;
+        }
+
+        canvas.html5 {
+            border: 3px solid #62e3b6;
+        }
+    </style>
+
+    <script type="text/javascript">
+
+        var g_neuralNetwork;
+
+        function readTextFile(file, callback) {
+            const rawFile = new XMLHttpRequest();
+            rawFile.overrideMimeType("application/json");
+            rawFile.open("GET", file, true);
+            rawFile.onreadystatechange = function () {
+                if (rawFile.readyState === 4 && rawFile.status === 200) {
+                    callback(rawFile.responseText);
+                }
+            }
+            rawFile.send(null);
+        }
+
+        readTextFile('WeightsBiases.json', function (text) {
+            g_neuralNetwork = JSON.parse(text);
+        });
+
+        var g_neuralNetworkOutput = [];
+
+        function OutputLayerWeightIndex(hiddenLayerNeuronIndex, outputLayerNeuronIndex) {
+            return outputLayerNeuronIndex * g_neuralNetwork.HiddenNeurons + hiddenLayerNeuronIndex;
+        }
+
+        function HiddenLayerWeightIndex(inputIndex, hiddenLayerNeuronIndex) {
+            return hiddenLayerNeuronIndex * g_neuralNetwork.InputNeurons + inputIndex;
+        }
+
+        function Recognize() {
+            // Hidden Layer
+            var hiddenLayerOutputs = [];
+            for (var neuronIndex = 0; neuronIndex < g_neuralNetwork.HiddenNeurons; ++neuronIndex) {
+                var Z = g_neuralNetwork.HiddenBiases[neuronIndex];
+
+                for (var inputIndex = 0; inputIndex < g_neuralNetwork.InputNeurons; ++inputIndex) {
+                    var pixel = parseFloat(g_scaledPanel.context.getImageData(inputIndex % 28, inputIndex / 28, 1, 1).data[0]) / 255.0;
+                    Z += pixel * g_neuralNetwork.HiddenWeights[HiddenLayerWeightIndex(inputIndex, neuronIndex)];
+                }
+
+                hiddenLayerOutputs[neuronIndex] = 1.0 / (1.0 + Math.exp(-Z));
+            }
+
+            // Output Layer
+            var outputLayerOutputs = [];
+            for (var neuronIndex = 0; neuronIndex < g_neuralNetwork.OutputNeurons; ++neuronIndex) {
+                var Z = g_neuralNetwork.OutputBiases[neuronIndex];
+                for (var inputIndex = 0; inputIndex < g_neuralNetwork.HiddenNeurons; ++inputIndex)
+                    Z += hiddenLayerOutputs[inputIndex] * g_neuralNetwork.OutputWeights[OutputLayerWeightIndex(inputIndex, neuronIndex)];
+
+                outputLayerOutputs[neuronIndex] = 1.0 / (1.0 + Math.exp(-Z));
+
+                g_neuralNetworkOutput[neuronIndex] = {
+                    "Neuron": neuronIndex,
+                    "Activation": outputLayerOutputs[neuronIndex]
+                };
+            }
+
+            // Sort output neurons by activation
+            function compare(a, b) {
+                if (a.Activation > b.Activation)
+                    return -1;
+                if (a.Activation < b.Activation)
+                    return 1;
+                return 0;
+            }
+
+            g_neuralNetworkOutput.sort(compare);
+
+            for (var neuronIndex = 0; neuronIndex < g_neuralNetwork.OutputNeurons; ++neuronIndex) {
+                document.getElementById("Digit" + neuronIndex).innerText = g_neuralNetworkOutput[neuronIndex].Neuron;
+                document.getElementById("Digit" + neuronIndex + "Activation").innerText = g_neuralNetworkOutput[neuronIndex].Activation.toFixed(6);
+            }
+        }
+
+        var g_graphPanel;
+        var g_scaledPanel;
+        var mouse = {x: 0, y: 0};
+
+        function GetPos(obj) {
+            var x = 0;
+            var y = 0;
+            do {
+                x += obj.offsetLeft;
+                y += obj.offsetTop;
+            } while (obj = obj.offsetParent);
+
+            return {mX: x, mY: y};
+        }
+
+        function onPageLoaded() {
+            g_graphPanel = setupCanvas('Graph');
+            g_scaledPanel = setupCanvas('Scaled');
+
+            g_graphPanel.context.lineWidth = 12;
+            g_graphPanel.context.lineJoin = 'round';
+            g_graphPanel.context.lineCap = 'round';
+            g_graphPanel.context.strokeStyle = '#FFFFFF';
+
+            g_graphPanel.elem.addEventListener('mousemove',
+                function (ev) {
+                    var pos = GetPos(g_graphPanel.elem);
+                    mouse.x = (ev.pageX - pos.mX) * g_graphPanel.elem.width / g_graphPanel.elem.offsetWidth;
+                    mouse.y = (ev.pageY - pos.mY) * g_graphPanel.elem.height / g_graphPanel.elem.offsetHeight;
+                }, false);
+
+            g_graphPanel.elem.addEventListener('mousedown', function (e) {
+                g_graphPanel.context.beginPath();
+                g_graphPanel.context.moveTo(mouse.x, mouse.y);
+
+                g_graphPanel.elem.addEventListener('mousemove', onPaint, false);
+            }, false);
+
+            g_graphPanel.elem.addEventListener('mouseup', function () {
+                g_graphPanel.elem.removeEventListener('mousemove', onPaint, false);
+            }, false);
+
+            var onPaint = function () {
+                g_graphPanel.context.lineTo(mouse.x, mouse.y);
+                g_graphPanel.context.stroke();
+                OnScaledNeedsUpdate();
+            };
+        }
+
+        function GetResizedCanvas(sourceCanvas, targetSize) {
+            var canvas1 = sourceCanvas;
+
+            while (1) {
+                if (canvas1.width > targetSize * 2) {
+                    var canvas2 = document.createElement('canvas');
+                    canvas2.width = canvas1.width * 0.5;
+                    canvas2.height = canvas1.height * 0.5;
+
+                    var canvas2Context = canvas2.getContext('2d');
+                    canvas2Context.drawImage(canvas1, 0, 0, canvas2.width, canvas2.height);
+
+                    canvas1 = canvas2;
+                } else {
+                    var canvas2 = document.createElement('canvas');
+                    canvas2.width = targetSize;
+                    canvas2.height = targetSize;
+
+                    var canvas2Context = canvas2.getContext('2d');
+                    canvas2Context.drawImage(canvas1, 0, 0, canvas2.width, canvas2.height);
+
+                    return canvas2;
+                }
+            }
+        }
+
+        var g_scaledNeedsUpdate = null;
+
+        function OnScaledNeedsUpdate() {
+            clearTimeout(g_scaledNeedsUpdate);
+            g_scaledNeedsUpdate = setTimeout(DrawScaled, 750);
+        }
+
+        // Cutting the image in half each time, instead of scaling to target in one go
+        function DrawScaled() {
+            // Find the bounding box of the source image
+            var minx = g_graphPanel.elem.width;
+            var miny = g_graphPanel.elem.height;
+            var maxx = 0;
+            var maxy = 0;
+            for (var iy = 0; iy < g_graphPanel.elem.height; ++iy) {
+                for (var ix = 0; ix < g_graphPanel.elem.width; ++ix) {
+                    var pixel = parseFloat(g_graphPanel.context.getImageData(ix, iy, 1, 1).data[0]);
+
+                    if (pixel > 0) {
+                        if (ix < minx)
+                            minx = ix;
+                        if (ix > maxx)
+                            maxx = ix;
+
+                        if (iy < miny)
+                            miny = iy;
+                        if (iy > maxy)
+                            maxy = iy;
+                    }
+                }
+            }
+
+            // Make the smaller side of the bounding box bigger to turn it into a square.
+            var width = maxx - minx;
+            var height = maxy - miny;
+            if (width < height) {
+                var diff = (height - width) / 2;
+                minx -= diff;
+                maxx += diff;
+                width = height;
+            } else {
+                var diff = (width - height) / 2;
+                miny -= diff;
+                maxy += diff;
+                height = width;
+            }
+
+            // Create an image representation of the square bounding box
+            var canvas1 = document.createElement('canvas');
+            canvas1.width = width;
+            canvas1.height = height;
+            var canvas1Context = canvas1.getContext('2d');
+            canvas1Context.drawImage(g_graphPanel.elem, -minx, -miny);
+
+            // Resize the bounding box image to a dimension of 20x20
+            var image20x20 = GetResizedCanvas(canvas1, 20, 20);
+            var image20x20Context = image20x20.getContext('2d');
+
+            /* Calculating the centre of mass of the image to use as the new centre instead of relying on the bounding box.
+            This aligns with the way the training data was generated */
+            var sumx = 0;
+            var sumy = 0;
+            var div = 0;
+            for (var iy = 0; iy < image20x20.height; ++iy) {
+                for (var ix = 0; ix < image20x20.width; ++ix) {
+                    var pixel = parseFloat(image20x20Context.getImageData(ix, iy, 1, 1).data[0]);
+
+                    sumx += ix * pixel;
+                    sumy += iy * pixel;
+
+                    div += pixel;
+                }
+            }
+            var centerOfMassX = sumx / div;
+            var centerOfMassY = sumy / div;
+            var offsetX = 10 - centerOfMassX;
+            var offsetY = 10 - centerOfMassY;
+
+            // Clear the scaled panel and draw the 20x20 image into it, centered on the calculated center of mass.
+            FillImageBuffer(g_scaledPanel.context, g_scaledPanel.elem, '#000000');
+            g_scaledPanel.context.drawImage(image20x20, 4 + offsetX, 4 + offsetY);
+
+            Recognize();
+        }
+
+        function setupCanvas(name) {
+            // Get a reference to the element
+            var elem = document.getElementById(name);
+
+            // Make sure if the code doesn't break
+            if (elem) {
+                if (elem.getContext) {
+                    // The 2d context
+                    var context = elem.getContext('2d');
+
+                    if (context) {
+                        return {"elem": elem, "context": context};
+                    } else {
+                        alert("Could not get the html5 2d context. Try another browser");
+                    }
+                } else {
+                    alert("The getContext function was missing. Try another browser");
+                }
+            } else {
+                alert("Could not get the element '" + name + "'");
+            }
+
+            return false;
+        }
+
+        // Connect the event listener
+        window.addEventListener('load', function () {
+            onPageLoaded();
+        }, false);
+
+        function FillImageBuffer(context, elem, color) {
+            context.fillStyle = color;
+            context.fillRect(0, 0, elem.width, elem.height);
+        }
+
+    </script>
+</head>
+
+<body>
+<h1 style="text-align: center;">Handwritten Digit Recognition</h1>
+<h3 style="text-align: center;">The demo features a feedforward sigmoid neural network that can recognize handwritten
+    numeric digits.
+    The network comprises a structure of 785, 30, and 10 neurons. The process involves scaling down the bounding box of
+    the drawing to
+    20x20 and centering it on the center of mass of the pixels in a 28x28 image. This image is then fed into the
+    pre-trained neural
+    network according to the instructions for how the MNIST training data was made.</h3>
+
+<table>
+    <tr>
+        <td style="padding: 5px;">
+            <div style="text-align: center; margin-top: 20px;">
+                <h3>Try to write a numeric digit</h3>
+            </div>
+            <canvas ID="Graph" class="html5" height="400" width="400">Your browser doesn't support the necessary HTML5
+                features
+            </canvas>
+            <div style="display: flex; justify-content: center;">
+                <input onClick=" FillImageBuffer(g_graphPanel.context, g_graphPanel.elem, '#000000');
+          document.getElementById('Digit0').textContent='0';
+          document.getElementById('Digit1').textContent='0';
+          document.getElementById('Digit2').textContent='0';
+          document.getElementById('Digit0Activation').textContent='0';
+          document.getElementById('Digit1Activation').textContent='0';
+          document.getElementById('Digit2Activation').textContent='0'; " style="font-size:40px; margin-top:25px; height:auto; width:300px;"
+                       type="button"
+                       value="Clear">
+            </div>
+        </td>
+
+        <td>
+            <table border="5" style="font-size:20px; margin-left: 20px;">
+                <tr>
+                    <td>Digit</td>
+                    <td>Prediction</td>
+                </tr>
+                <tr>
+                    <td id="Digit0" style="text-align: center;">0</td>
+                    <td id="Digit0Activation" style="text-align: center;">0</td>
+                </tr>
+                <tr>
+                    <td id="Digit1" style="text-align: center;">0</td>
+                    <td id="Digit1Activation" style="text-align: center;">0</td>
+                </tr>
+                <tr>
+                    <td id="Digit2" style="text-align: center;">0</td>
+                    <td id="Digit2Activation" style="text-align: center;">0</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<canvas ID="Scaled" class="html5" height="28" width="28"></canvas>
+</body>
