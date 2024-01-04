@@ -1,9 +1,9 @@
 NO_RANDOMIZATION tests
 
 ------------------------------------------------------------------------------------------------------------------------
-Floating point Test #2
+Initial Test
 Conditions: hdr-nn architecture, c_trainingEpochs: 10
-Subject: All floating point variables are <long double>
+Subject: Initial test of hdr-nn architecture
 Output:
 Initial test data accuracy: 7.370000%
 The training time:  8.5914 seconds
