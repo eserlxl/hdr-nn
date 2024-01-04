@@ -2,24 +2,6 @@
 #include "dataLoader.h"
 #include "neuralNetwork.h"
 
-/*
-float:
-Initial test data accuracy: 9.690001%
-The training time:  8.88 seconds
-
-Final training data accuracy: 95.598335%
-Final test data accuracy: 94.470001%
-
- long double:
-
- Initial test data accuracy: 8.290001%
- The training time:  75.16 seconds
-
-Final training data accuracy: 95.738333%
-Final test data accuracy: 94.520000%
-
- */
-
 // Setting to "1" shows error after each training and writes them in Error.csv file
 // It may slow down the training process by 50%.
 #define REPORT_ERROR_WHILE_TRAINING() 0
@@ -36,22 +18,6 @@ const float c_learningRate = 3.0f;
 MNISTData g_trainingData;
 MNISTData g_testData;
 
-// neural network
-neuralNetwork *g_neuralNetwork = new neuralNetwork(c_numInputNeurons, c_numHiddenNeurons, c_numOutputNeurons);
-
-float GetDataAccuracy(const MNISTData &data) {
-    size_t correctItems = 0;
-    for (size_t i = 0, c = data.NumImages(); i < c; ++i) {
-        uint8_t label;
-        const float *pixels = data.GetImage(i, label);
-        uint8_t detectedLabel = g_neuralNetwork->feedForward(pixels, label);
-
-        if (detectedLabel == label)
-            ++correctItems;
-    }
-    return float(correctItems) / float(data.NumImages());
-}
-
 int main(int argc, char **argv) {
     // Loading the MNIST data
     if (!g_trainingData.Load(true) || !g_testData.Load(false)) {
@@ -59,7 +25,9 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    printf("\nInitial test data accuracy: %0.6f%%\n\n", 100.0f * GetDataAccuracy(g_testData));
+    auto *g_neuralNetwork = new neuralNetwork(c_numInputNeurons, c_numHiddenNeurons, c_numOutputNeurons);
+
+    printf("\nInitial test data accuracy: %0.6f%%\n\n", 100.0f * g_neuralNetwork->getDataAccuracy(g_testData));
 
 #if REPORT_ERROR_WHILE_TRAINING()
     FILE *file = fopen("Error.csv","w+t");
@@ -91,8 +59,8 @@ int main(int argc, char **argv) {
     }
 
     // report final error
-    float accuracyTraining = GetDataAccuracy(g_trainingData);
-    float accuracyTest = GetDataAccuracy(g_testData);
+    float accuracyTraining = g_neuralNetwork->getDataAccuracy(g_trainingData);
+    float accuracyTest = g_neuralNetwork->getDataAccuracy(g_testData);
     printf("\nFinal training data accuracy: %0.6f%%\n", 100.0f * accuracyTraining);
     printf("Final test data accuracy: %0.6f%%\n\n", 100.0f * accuracyTest);
 
@@ -159,6 +127,8 @@ int main(int argc, char **argv) {
         fprintf(file, "}\n");
         fclose(file);
     }
+
+    delete(g_neuralNetwork);
 
     return 0;
 }

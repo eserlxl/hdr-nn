@@ -66,6 +66,19 @@ public:
 
     void backPropagation(const float *pixels, uint8_t correctLabel);
 
+    float getDataAccuracy(const MNISTData &data) {
+        size_t correctItems = 0;
+        for (size_t i = 0, c = data.NumImages(); i < c; ++i) {
+            uint8_t label;
+            const float *pixels = data.GetImage(i, label);
+            uint8_t detectedLabel = feedForward(pixels, label);
+
+            if (detectedLabel == label)
+                ++correctItems;
+        }
+        return float(correctItems) / float(data.NumImages());
+    }
+
     // Functions to get weights / bias values. They are used to make the JSON file
     const std::vector<float> &GetHiddenLayerBiases() const { return m_hiddenLayerBiases; }
 

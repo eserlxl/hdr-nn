@@ -1,0 +1,34 @@
+NO_RANDOMIZATION tests
+
+------------------------------------------------------------------------------------------------------------------------
+Floating point Test #2
+Conditions: hdr-nn architecture, c_trainingEpochs: 10
+Subject: All floating point variables are <long double>
+Output:
+Initial test data accuracy: 7.370000%
+The training time:  8.5914 seconds
+Final training data accuracy: 96.080002%
+Final test data accuracy: 94.739998%
+------------------------------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------------------------
+[OLD_ARCHITECTURE] Floating point Test #1
+Conditions: Before hdr-nn architecture, c_trainingEpochs: 10
+Subject: All floating point variables are <float>
+Output:
+Initial test data accuracy: 9.690001%
+The training time:  8.88 seconds
+Final training data accuracy: 95.598335%
+Final test data accuracy: 94.470001%
+------------------------------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------------------------
+[OLD_ARCHITECTURE] Floating point Test #2
+Conditions: Before hdr-nn architecture, c_trainingEpochs: 10
+Subject: All floating point variables are <long double>
+Output:
+Initial test data accuracy: 8.290001%
+The training time:  75.16 seconds
+Final training data accuracy: 95.738333%
+Final test data accuracy: 94.520000%
+------------------------------------------------------------------------------------------------------------------------
