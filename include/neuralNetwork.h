@@ -62,7 +62,7 @@ public:
 
     void train(const MNISTData &trainingData, size_t miniBatchSize, float learningRate);
 
-    uint8_t feedForward(const float *pixels, uint8_t correctLabel);
+    void feedForward(const float *pixels);
 
     void backPropagation(const float *pixels, uint8_t correctLabel);
 
@@ -71,7 +71,17 @@ public:
         for (size_t i = 0, c = data.NumImages(); i < c; ++i) {
             uint8_t label;
             const float *pixels = data.GetImage(i, label);
-            uint8_t detectedLabel = feedForward(pixels, label);
+            feedForward(pixels);
+
+            // Finding the maximum value of the output layer and return the index as the label
+            float maxOutput = m_outputLayerOutputs[0];
+            size_t detectedLabel = 0;
+            for (size_t j = 1; j < output_neurons; ++j) {
+                if (m_outputLayerOutputs[j] > maxOutput) {
+                    maxOutput = m_outputLayerOutputs[j];
+                    detectedLabel = j;
+                }
+            }
 
             if (detectedLabel == label)
                 ++correctItems;

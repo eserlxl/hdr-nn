@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
         fclose(file);
     }
 
-    delete(g_neuralNetwork);
+    delete (g_neuralNetwork);
 
     return 0;
 }

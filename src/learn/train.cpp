@@ -31,7 +31,7 @@ void neuralNetwork::train(const MNISTData &trainingData, size_t miniBatchSize, f
             const float *pixels = trainingData.GetImage(m_trainingOrder[trainingIndex], imageLabel);
 
             // Run the forward pass of the network
-            uint8_t labelDetected = feedForward(pixels, imageLabel);
+            feedForward(pixels);
 
             // Run the backward pass to get derivatives of the cost function
             backPropagation(pixels, imageLabel);
