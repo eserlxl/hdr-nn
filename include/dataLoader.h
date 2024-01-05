@@ -57,7 +57,7 @@ public:
 
         /* Perform endian swapping on the label file's first two uint32 values if required,
         while the rest of the file contains uint8 values. */
-        uint32_t *data = (uint32_t *) m_labelData;
+        auto *data = (uint32_t *) m_labelData;
         if (data[0] == 0x01080000) {
             data[0] = EndianSwap(data[0]);
             data[1] = EndianSwap(data[1]);

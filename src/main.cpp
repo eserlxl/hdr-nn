@@ -69,65 +69,7 @@ int main(int argc, char **argv) {
     fclose(file);
 #endif
 
-    // Write out the final weights and biases as JSON for use in the web demo
-    {
-        FILE *file = fopen("WeightsBiases.json", "w+t");
-        fprintf(file, "{\n");
-
-        // network structure
-        fprintf(file, "  \"InputNeurons\":%zu,\n", c_numInputNeurons);
-        fprintf(file, "  \"HiddenNeurons\":%zu,\n", c_numHiddenNeurons);
-        fprintf(file, "  \"OutputNeurons\":%zu,\n", c_numOutputNeurons);
-
-        // HiddenBiases
-        auto hiddenBiases = g_neuralNetwork->GetHiddenLayerBiases();
-        fprintf(file, "  \"HiddenBiases\" : [\n");
-        for (size_t i = 0; i < hiddenBiases.size(); ++i) {
-            fprintf(file, "    %f", hiddenBiases[i]);
-            if (i < hiddenBiases.size() - 1)
-                fprintf(file, ",");
-            fprintf(file, "\n");
-        }
-        fprintf(file, "  ],\n");
-
-        // HiddenWeights
-        auto hiddenWeights = g_neuralNetwork->GetHiddenLayerWeights();
-        fprintf(file, "  \"HiddenWeights\" : [\n");
-        for (size_t i = 0; i < hiddenWeights.size(); ++i) {
-            fprintf(file, "    %f", hiddenWeights[i]);
-            if (i < hiddenWeights.size() - 1)
-                fprintf(file, ",");
-            fprintf(file, "\n");
-        }
-        fprintf(file, "  ],\n");
-
-        // OutputBiases
-        auto outputBiases = g_neuralNetwork->GetOutputLayerBiases();
-        fprintf(file, "  \"OutputBiases\" : [\n");
-        for (size_t i = 0; i < outputBiases.size(); ++i) {
-            fprintf(file, "    %f", outputBiases[i]);
-            if (i < outputBiases.size() - 1)
-                fprintf(file, ",");
-            fprintf(file, "\n");
-        }
-        fprintf(file, "  ],\n");
-
-        // OutputWeights
-        auto outputWeights = g_neuralNetwork->GetOutputLayerWeights();
-        fprintf(file, "  \"OutputWeights\" : [\n");
-        for (size_t i = 0; i < outputWeights.size(); ++i) {
-            fprintf(file, "    %f", outputWeights[i]);
-            if (i < outputWeights.size() - 1)
-                fprintf(file, ",");
-            fprintf(file, "\n");
-        }
-        fprintf(file, "  ]\n");
-
-        // The end of training the neural network
-        fprintf(file, "}\n");
-        fclose(file);
-    }
-
+    g_neuralNetwork->save();
     delete (g_neuralNetwork);
 
     return 0;

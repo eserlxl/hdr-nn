@@ -98,6 +98,8 @@ public:
 
     const std::vector<float> &GetOutputLayerWeights() const { return m_outputLayerWeights; }
 
+    void save();
+
 private:
 
     size_t HiddenLayerWeightIndex(size_t inputIndex, size_t hiddenLayerNeuronIndex) const {
