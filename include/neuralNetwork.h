@@ -9,7 +9,7 @@
 #include <array>
 #include <vector>
 #include <algorithm>
-
+#include "logic.h"
 #include "dataLoader.h"
 
 #define NO_RANDOMIZATION // Only for testing the algorithm, we need the same results for each run to compare.
@@ -82,8 +82,20 @@ public:
                     detectedLabel = j;
                 }
             }
+            // Checking output layers for false positives, define safe range as 15%
+            size_t falsePositive = 0;
+            for (size_t j = 0; j < output_neurons; j++) {
+                if(j==detectedLabel)
+                {
+                    continue;
+                }
+                if((maxOutput-m_outputLayerOutputs[j])/maxOutput<0.15)
+                {
+                    falsePositive++;
+                }
+            }
 
-            if (detectedLabel == label)
+            if (falsePositive == 0 && detectedLabel == label)
                 ++correctItems;
         }
         return float(correctItems) / float(data.getImageCount());
