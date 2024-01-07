@@ -23,7 +23,7 @@ public:
         m_pixels = nullptr;
     }
 
-    bool Load(bool training) {
+    bool load(bool training) {
         // Set the expected image count
         m_imageCount = training ? 60000 : 10000;
 
@@ -100,9 +100,9 @@ public:
         delete[] m_imageData;
     }
 
-    size_t NumImages() const { return m_imageCount; }
+    size_t getImageCount() const { return m_imageCount; }
 
-    const float *GetImage(size_t index, uint8_t &label) const {
+    const float *getImage(size_t index, uint8_t &label) const {
         label = m_labels[index];
         return &m_pixelsFloat[index * 28 * 28];
     }

@@ -68,9 +68,9 @@ public:
 
     float getDataAccuracy(const MNISTData &data) {
         size_t correctItems = 0;
-        for (size_t i = 0, c = data.NumImages(); i < c; ++i) {
+        for (size_t i = 0, c = data.getImageCount(); i < c; ++i) {
             uint8_t label;
-            const float *pixels = data.GetImage(i, label);
+            const float *pixels = data.getImage(i, label);
             feedForward(pixels);
 
             // Finding the maximum value of the output layer and return the index as the label
@@ -86,7 +86,7 @@ public:
             if (detectedLabel == label)
                 ++correctItems;
         }
-        return float(correctItems) / float(data.NumImages());
+        return float(correctItems) / float(data.getImageCount());
     }
 
     // Functions to get weights / bias values. They are used to make the JSON file

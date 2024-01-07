@@ -6,28 +6,26 @@
 // It may slow down the training process by 50%.
 #define REPORT_ERROR_WHILE_TRAINING() 0
 
-const size_t c_numInputNeurons = 785;
-const size_t c_numHiddenNeurons = 30; // Setting up more neurons may give better result of neural network accuracy
-const size_t c_numOutputNeurons = 10;
-
 const size_t c_trainingEpochs = 10;
 const size_t c_miniBatchSize = 10;
-const float c_learningRate = 3.0f;
+const float c_learningRate = 10.f;
 
 // The datasets used for training and testing a model
 MNISTData g_trainingData;
 MNISTData g_testData;
 
 int main(int argc, char **argv) {
+
     // Loading the MNIST data
-    if (!g_trainingData.Load(true) || !g_testData.Load(false)) {
+    if (!g_trainingData.load(true) || !g_testData.load(false)) {
         printf("Could not load the MNIST data!\n");
         return 1;
     }
 
-    auto *g_neuralNetwork = new neuralNetwork(c_numInputNeurons, c_numHiddenNeurons, c_numOutputNeurons);
+    auto *nn = new neuralNetwork(785, 1000, 10);
 
-    printf("\nInitial test data accuracy: %0.6f%%\n\n", 100.0f * g_neuralNetwork->getDataAccuracy(g_testData));
+    //printf("\nInitial training data accuracy: %0.3f%%\n", 100.0f * nn->getDataAccuracy(g_trainingData));
+    //printf("\nInitial test data accuracy: %0.3f%%\n\n", 100.0f * nn->getDataAccuracy(g_testData));
 
 #if REPORT_ERROR_WHILE_TRAINING()
     FILE *file = fopen("Error.csv","w+t");
@@ -53,24 +51,23 @@ int main(int argc, char **argv) {
 #endif
 
             printf("Training the epoch %zu / %zu...\n", epoch + 1, c_trainingEpochs);
-            g_neuralNetwork->train(g_trainingData, c_miniBatchSize, c_learningRate);
+            nn->train(g_trainingData, c_miniBatchSize, c_learningRate);
             printf("\n");
         }
     }
 
     // report final error
-    float accuracyTraining = g_neuralNetwork->getDataAccuracy(g_trainingData);
-    float accuracyTest = g_neuralNetwork->getDataAccuracy(g_testData);
-    printf("\nFinal training data accuracy: %0.6f%%\n", 100.0f * accuracyTraining);
-    printf("Final test data accuracy: %0.6f%%\n\n", 100.0f * accuracyTest);
+    float accuracyTraining = nn->getDataAccuracy(g_trainingData);
+    float accuracyTest = nn->getDataAccuracy(g_testData);
+    printf("\nTraining/Test Accuracy: %0.3f%% / %0.3f%%\n", 100.0f * accuracyTraining, 100.0f * accuracyTest);
 
 #if REPORT_ERROR_WHILE_TRAINING()
     fprintf(file, "\"%f\",\"%f\"\n", accuracyTraining, accuracyTest);
     fclose(file);
 #endif
 
-    g_neuralNetwork->save();
-    delete (g_neuralNetwork);
+    nn->save();
+    delete (nn);
 
     return 0;
 }

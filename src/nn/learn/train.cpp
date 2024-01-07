@@ -2,8 +2,8 @@
 
 void neuralNetwork::train(const MNISTData &trainingData, size_t miniBatchSize, float learningRate) {
     // Randomize the order of the training data to create mini-batches
-    if (m_trainingOrder.size() != trainingData.NumImages()) {
-        m_trainingOrder.resize(trainingData.NumImages());
+    if (m_trainingOrder.size() != trainingData.getImageCount()) {
+        m_trainingOrder.resize(trainingData.getImageCount());
         size_t index = 0;
         for (size_t &v : m_trainingOrder) {
             v = index;
@@ -16,7 +16,7 @@ void neuralNetwork::train(const MNISTData &trainingData, size_t miniBatchSize, f
     std::shuffle(m_trainingOrder.begin(), m_trainingOrder.end(), e2);
     // Process all minibatches until we are out of training examples
     size_t trainingIndex = 0;
-    while (trainingIndex < trainingData.NumImages()) {
+    while (trainingIndex < trainingData.getImageCount()) {
         // Clear out minibatch derivatives. Sum up and then divide them at the end of the minibatch
         std::fill(m_miniBatchHiddenLayerBiasesDeltaCost.begin(), m_miniBatchHiddenLayerBiasesDeltaCost.end(), 0.0f);
         std::fill(m_miniBatchOutputLayerBiasesDeltaCost.begin(), m_miniBatchOutputLayerBiasesDeltaCost.end(), 0.0f);
@@ -25,10 +25,10 @@ void neuralNetwork::train(const MNISTData &trainingData, size_t miniBatchSize, f
 
         // Process the minibatch
         size_t miniBatchIndex = 0;
-        while (miniBatchIndex < miniBatchSize && trainingIndex < trainingData.NumImages()) {
+        while (miniBatchIndex < miniBatchSize && trainingIndex < trainingData.getImageCount()) {
             // Get the training item
             uint8_t imageLabel = 0;
-            const float *pixels = trainingData.GetImage(m_trainingOrder[trainingIndex], imageLabel);
+            const float *pixels = trainingData.getImage(m_trainingOrder[trainingIndex], imageLabel);
 
             // Run the forward pass of the network
             feedForward(pixels);

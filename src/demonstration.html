@@ -69,7 +69,7 @@
                     Z += pixel * g_neuralNetwork.HiddenWeights[HiddenLayerWeightIndex(inputIndex, neuronIndex)];
                 }
 
-                hiddenLayerOutputs[neuronIndex] = 1.0 / (1.0 + Math.exp(-Z));
+                hiddenLayerOutputs[neuronIndex] = 1.0 / (1.0 + Math.exp(-46.875*Z));
             }
 
             // Output Layer
@@ -306,7 +306,7 @@
 <h1 style="text-align: center;">Handwritten Digit Recognition</h1>
 <h3 style="text-align: center;">The demo features a feedforward sigmoid neural network that can recognize handwritten
     numeric digits.
-    The network comprises a structure of 785, 30, and 10 neurons. The process involves scaling down the bounding box of
+    The network comprises a structure of 785, 235, and 10 neurons. The process involves scaling down the bounding box of
     the drawing to
     20x20 and centering it on the center of mass of the pixels in a 28x28 image. This image is then fed into the
     pre-trained neural
