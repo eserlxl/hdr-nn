@@ -9,4 +9,4 @@ include_directories(include)
 
 add_executable(hdr-nn
         include/neuralNetwork.h include/timer.h include/dataLoader.h src/nn/learn/train.cpp
-        src/main.cpp src/nn/learn/feedForward.cpp src/nn/learn/backPropagation.cpp src/nn/nn.cpp)
+        src/main.cpp src/nn/learn/feedForward.cpp src/nn/learn/backPropagation.cpp src/nn/nn.cpp include/logic.h)
