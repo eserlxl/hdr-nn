@@ -1,5 +1,5 @@
-#ifndef NN_H
-#define NN_H
+#ifndef HDR_NN_H
+#define HDR_NN_H
 
 #include <iostream>
 #include <cstdio>
@@ -141,4 +141,4 @@ private:
     std::vector<size_t> m_trainingOrder;
 };
 
-#endif // NN_H
+#endif // HDR_NN_H

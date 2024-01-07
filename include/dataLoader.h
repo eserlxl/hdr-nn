@@ -1,5 +1,5 @@
-#ifndef DATA_LOADER_H
-#define DATA_LOADER_H
+#ifndef HDR_DATA_LOADER_H
+#define HDR_DATA_LOADER_H
 
 #include <iostream>
 #include <vector>
@@ -117,4 +117,4 @@ private:
     std::vector<float> m_pixelsFloat;
 };
 
-#endif // DATA_LOADER_H
+#endif // HDR_DATA_LOADER_H

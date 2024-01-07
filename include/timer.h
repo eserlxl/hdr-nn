@@ -1,5 +1,5 @@
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef HDR_TIMER_H
+#define HDR_TIMER_H
 
 #include <iostream>
 #include <chrono>
@@ -19,4 +19,4 @@ struct Timer {
     const char *m_label;
 };
 
-#endif //TIMER_H
+#endif //HDR_TIMER_H
