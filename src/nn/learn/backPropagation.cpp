@@ -6,7 +6,7 @@ by comparing the label predicted by the network to the correct label */
 
 void neuralNetwork::backPropagation(const float *pixels, uint8_t correctLabel) {
     // Since we are proceeding backwards, we are starting with the output layer
-    for (size_t j = 0; j < output_neurons; ++j) {
+    for (size_t j = 0; j < output_neurons; j++) {
         float desiredOutput = (correctLabel == j) ? 1.0f : 0.0f;
 
         float deltaCost_deltaO = m_outputLayerOutputs[j] - desiredOutput;
@@ -15,12 +15,13 @@ void neuralNetwork::backPropagation(const float *pixels, uint8_t correctLabel) {
         m_outputLayerBiasesDeltaCost[j] = deltaCost_deltaO * deltaO_deltaZ;
 
         // Calculating deltaCost/deltaWeight for each weight going into the neuron
-        for (size_t i = 0; i < hidden_neurons; ++i)
+        for (size_t i = 0; i < hidden_neurons; i++) {
             m_outputLayerWeightsDeltaCost[OutputLayerWeightIndex(i, j)] =
                     m_outputLayerBiasesDeltaCost[j] * m_hiddenLayerOutputs[i];
+        }
     }
 
-    for (size_t j = 0; j < hidden_neurons; ++j) {
+    for (size_t j = 0; j < hidden_neurons; j++) {
         /* To calculate the error (deltaCost/deltaBias) for each hidden neuron we are following these steps:
 
         1. Multiply the deltaCost/deltaDestinationZ, which is already calculated and stored in
@@ -32,15 +33,17 @@ void neuralNetwork::backPropagation(const float *pixels, uint8_t correctLabel) {
         By following these steps, you can calculate the error (deltaCost/deltaBias) for each hidden neuron */
 
         float deltaCost_deltaO = 0.0f;
-        for (size_t destinationNeuronIndex = 0; destinationNeuronIndex < output_neurons; ++destinationNeuronIndex)
-            deltaCost_deltaO += m_outputLayerBiasesDeltaCost[destinationNeuronIndex] *
-                                m_outputLayerWeights[OutputLayerWeightIndex(j, destinationNeuronIndex)];
+        for (size_t i = 0; i < output_neurons; i++) {
+            deltaCost_deltaO += m_outputLayerBiasesDeltaCost[i] * m_outputLayerWeights[OutputLayerWeightIndex(j, i)];
+        }
+
         float deltaO_deltaZ = m_hiddenLayerOutputs[j] * (1.0f - m_hiddenLayerOutputs[j]);
         m_hiddenLayerBiasesDeltaCost[j] = deltaCost_deltaO * deltaO_deltaZ;
 
         // Calculating deltaCost/deltaWeight for each weight going into the neuron
-        for (size_t i = 0; i < inputs; ++i)
-            m_hiddenLayerWeightsDeltaCost[HiddenLayerWeightIndex(i, j)] =
-                    m_hiddenLayerBiasesDeltaCost[j] * pixels[i];
+        for (size_t i = 0; i < inputs; i++) {
+            m_hiddenLayerWeightsDeltaCost[HiddenLayerWeightIndex(i, j)] = m_hiddenLayerBiasesDeltaCost[j] * pixels[i];
+        }
+
     }
 }
