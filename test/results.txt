@@ -1,4 +1,12 @@
-NO_RANDOMIZATION tests
+NO_RANDOMIZATION tests, single thread on 12th Gen Intel(R) Core(TM) i7-12700H, CPU max speed: 4.7 GHz
+
+Sigmoid
+ Training/Test Accuracy, Best results:
+ * 99.885% with a=46.875, hidden_neurons = 235, epoch = 1000, learningRate=10, training time: 7385.4 seconds
+ * 99.840% / 98.120% with a=46.875, hidden_neurons = 300, epoch = 100, learningRate=10, training time: 979.328 seconds
+ * 99.837% / 98.09% with a=46.875, hidden_neurons = 235, epoch = 100, learningRate=10, training time: 759.614 seconds
+ * 99.663% / 98.200% with a=46.875, hidden_neurons = 1000, epoch = 10, learningRate=10, training time: 332.99 seconds
+ * 99.438% / 97.910% with a=46.875, hidden_neurons = 235, epoch = 10, learningRate=10, training time: 76.8614 seconds
 
 ------------------------------------------------------------------------------------------------------------------------
 Initial Test
